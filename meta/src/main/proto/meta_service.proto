@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package ru.mipt.movies.meta;
+
+option java_multiple_files = true;
+option java_package = "ru.mipt.movies.meta.proto";
+option java_outer_classname = "MetaServiceProto";
+
+service MetaService {
+  rpc CreateFilm(CreateFilmRequest) returns (CreateFilmResponse);
+  
+  rpc DeleteFilm(DeleteFilmRequest) returns (DeleteFilmResponse);
+  
+  rpc UpdateFilm(UpdateFilmRequest) returns (UpdateFilmResponse);
+  
+  rpc SetAvailability(SetAvailabilityRequest) returns (SetAvailabilityResponse);
+}
+
+message CreateFilmRequest {
+  string name = 1;
+  string description = 2;
+}
+
+message CreateFilmResponse {
+  string film_id = 1;
+}
+
+message DeleteFilmRequest {
+  string film_id = 1;
+}
+
+message DeleteFilmResponse {
+  bool success = 1;
+}
+
+message UpdateFilmRequest {
+  string film_id = 1;
+  string name = 2;
+  string description = 3;
+}
+
+message UpdateFilmResponse {
+  bool success = 1;
+}
+
+message SetAvailabilityRequest {
+  string film_id = 1;
+  bool is_available = 2;
+}
+
+message SetAvailabilityResponse {
+  bool success = 1;
+}
