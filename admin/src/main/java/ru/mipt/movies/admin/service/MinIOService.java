@@ -3,6 +3,7 @@ package ru.mipt.movies.admin.service;
 import io.minio.BucketExistsArgs;
 import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
+import io.minio.RemoveObjectArgs;
 import io.minio.PutObjectArgs;
 import io.minio.errors.MinioException;
 import org.slf4j.Logger;
@@ -11,6 +12,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -74,6 +77,45 @@ public class MinIOService {
         } catch (Exception e) {
             logger.error("Error uploading video to MinIO for film ID: {}", filmId, e);
             throw new RuntimeException("Failed to upload video to MinIO", e);
+        }
+    }
+
+    public String replaceVideo(UUID filmId, InputStream inputStream, long size, String contentType) {
+        try {
+            deleteVideo(filmId);
+            return uploadVideo(filmId, inputStream, size, contentType);
+        } catch (Exception e) {
+            logger.error("Error replacing video for film ID: {}", filmId, e);
+            throw new RuntimeException("Failed to replace video", e);
+        }
+    }
+
+    public void deleteVideo(UUID filmId) {
+        try {
+            List<String> objectsToDelete = new ArrayList<>();
+            objectsToDelete.add(filmId.toString() + "_raw");
+
+            String[] qualities = {"360p", "480p", "720p", "1080p"};
+            for (String quality : qualities) {
+                objectsToDelete.add(filmId + "_" + quality);
+            }
+
+            for (String objectName : objectsToDelete) {
+                try {
+                    minioClient.removeObject(RemoveObjectArgs.builder()
+                            .bucket(bucketName)
+                            .object(objectName)
+                            .build());
+                    logger.info("Deleted object from MinIO: bucket={}, object={}", bucketName, objectName);
+                } catch (Exception e) {
+                    logger.debug("Could not delete object (might not exist): bucket={}, object={}", bucketName, objectName);
+                }
+            }
+            
+            logger.info("Video deletion completed for film ID: {}", filmId);
+        } catch (Exception e) {
+            logger.error("Error deleting video from MinIO for film ID: {}", filmId, e);
+            throw new RuntimeException("Failed to delete video from MinIO", e);
         }
     }
 }

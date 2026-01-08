@@ -5,10 +5,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import ru.mipt.movies.meta.proto.MetaServiceGrpc;
-import ru.mipt.movies.meta.proto.CreateFilmRequest;
-import ru.mipt.movies.meta.proto.CreateFilmResponse;
+import ru.mipt.movies.meta.proto.*;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class MetaServiceClient {
@@ -35,6 +38,108 @@ public class MetaServiceClient {
         } catch (Exception e) {
             logger.error("Error creating film in Meta Service", e);
             throw new RuntimeException("Failed to create film in Meta Service", e);
+        }
+    }
+
+    public Map<String, Object> getFilm(UUID filmId) {
+        try {
+            logger.info("Getting film from Meta Service: filmId={}", filmId);
+
+            GetFilmRequest request = GetFilmRequest.newBuilder()
+                    .setFilmId(filmId.toString())
+                    .build();
+
+            GetFilmResponse response = metaServiceStub.getFilm(request);
+
+            if (!response.getFound()) {
+                logger.warn("Film not found: filmId={}", filmId);
+                return null;
+            }
+
+            Film film = response.getFilm();
+            Map<String, Object> filmMap = new HashMap<>();
+            filmMap.put("filmId", film.getFilmId());
+            filmMap.put("name", film.getName());
+            filmMap.put("description", film.getDescription());
+            filmMap.put("available", film.getAvailable());
+            filmMap.put("createdAt", film.getCreatedAt());
+            filmMap.put("updatedAt", film.getUpdatedAt());
+
+            logger.info("Film retrieved successfully: filmId={}", filmId);
+            return filmMap;
+        } catch (Exception e) {
+            logger.error("Error getting film from Meta Service: filmId={}", filmId, e);
+            throw new RuntimeException("Failed to get film from Meta Service", e);
+        }
+    }
+
+    public boolean updateFilm(UUID filmId, String name, String description) {
+        try {
+            logger.info("Updating film in Meta Service: filmId={}, name={}, description={}", filmId, name, description);
+
+            UpdateFilmRequest.Builder requestBuilder = UpdateFilmRequest.newBuilder()
+                    .setFilmId(filmId.toString());
+
+            if (name != null && !name.isEmpty()) {
+                requestBuilder.setName(name);
+            }
+            if (description != null && !description.isEmpty()) {
+                requestBuilder.setDescription(description);
+            }
+
+            UpdateFilmResponse response = metaServiceStub.updateFilm(requestBuilder.build());
+
+            logger.info("Film update result: filmId={}, success={}", filmId, response.getSuccess());
+            return response.getSuccess();
+        } catch (Exception e) {
+            logger.error("Error updating film in Meta Service: filmId={}", filmId, e);
+            throw new RuntimeException("Failed to update film in Meta Service", e);
+        }
+    }
+
+    public boolean deleteFilm(UUID filmId) {
+        try {
+            logger.info("Deleting film from Meta Service: filmId={}", filmId);
+
+            DeleteFilmRequest request = DeleteFilmRequest.newBuilder()
+                    .setFilmId(filmId.toString())
+                    .build();
+
+            DeleteFilmResponse response = metaServiceStub.deleteFilm(request);
+
+            logger.info("Film deletion result: filmId={}, success={}", filmId, response.getSuccess());
+            return response.getSuccess();
+        } catch (Exception e) {
+            logger.error("Error deleting film from Meta Service: filmId={}", filmId, e);
+            throw new RuntimeException("Failed to delete film from Meta Service", e);
+        }
+    }
+
+    public List<Map<String, Object>> getAllFilms() {
+        try {
+            logger.info("Getting all films from Meta Service");
+
+            GetAllFilmsRequest request = GetAllFilmsRequest.newBuilder().build();
+            GetAllFilmsResponse response = metaServiceStub.getAllFilms(request);
+
+            List<Map<String, Object>> films = response.getFilmsList().stream()
+                    .map(film -> {
+                        Map<String, Object> filmMap = new HashMap<>();
+                        filmMap.put("filmId", film.getFilmId());
+                        filmMap.put("name", film.getName());
+                        filmMap.put("description", film.getDescription());
+                        filmMap.put("available", film.getAvailable());
+                        filmMap.put("createdAt", film.getCreatedAt());
+                        filmMap.put("updatedAt", film.getUpdatedAt());
+                        return filmMap;
+                    })
+                    .collect(Collectors.toList());
+
+            logger.info("Retrieved {} films successfully", films.size());
+            return films;
+        } catch (Exception e) {
+            logger.error("Error getting all films from Meta Service", e);
+            throw new RuntimeException("Failed to get all films from Meta Service", e);
         }
     }
 }

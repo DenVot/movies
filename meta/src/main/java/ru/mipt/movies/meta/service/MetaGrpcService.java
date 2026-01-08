@@ -9,7 +9,10 @@ import ru.mipt.movies.meta.proto.MetaServiceGrpc;
 import ru.mipt.movies.meta.proto.*;
 import ru.mipt.movies.meta.repository.FilmMetadataRepository;
 
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @GrpcService
 public class MetaGrpcService extends MetaServiceGrpc.MetaServiceImplBase {
@@ -146,6 +149,75 @@ public class MetaGrpcService extends MetaServiceGrpc.MetaServiceImplBase {
             logger.error("Error setting availability", e);
             responseObserver.onError(e);
         }
+    }
+
+    @Override
+    public void getFilm(GetFilmRequest request, StreamObserver<GetFilmResponse> responseObserver) {
+        try {
+            UUID filmId = UUID.fromString(request.getFilmId());
+            logger.info("Getting film with ID: {}", filmId);
+
+            FilmMetadata film = repository.findById(filmId).orElse(null);
+            if (film == null) {
+                GetFilmResponse response = GetFilmResponse.newBuilder()
+                        .setFound(false)
+                        .build();
+                responseObserver.onNext(response);
+                responseObserver.onCompleted();
+                logger.warn("Film with ID {} not found", filmId);
+                return;
+            }
+
+            Film filmProto = convertToFilmProto(film);
+            GetFilmResponse response = GetFilmResponse.newBuilder()
+                    .setFound(true)
+                    .setFilm(filmProto)
+                    .build();
+
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+
+            logger.info("Film retrieved successfully: {}", filmId);
+        } catch (Exception e) {
+            logger.error("Error getting film", e);
+            responseObserver.onError(e);
+        }
+    }
+
+    @Override
+    public void getAllFilms(GetAllFilmsRequest request, StreamObserver<GetAllFilmsResponse> responseObserver) {
+        try {
+            logger.info("Getting all films");
+
+            List<FilmMetadata> allFilms = repository.findAll();
+            List<Film> filmsProto = allFilms.stream()
+                    .map(this::convertToFilmProto)
+                    .collect(Collectors.toList());
+
+            GetAllFilmsResponse response = GetAllFilmsResponse.newBuilder()
+                    .addAllFilms(filmsProto)
+                    .build();
+
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+
+            logger.info("Retrieved {} films successfully", filmsProto.size());
+        } catch (Exception e) {
+            logger.error("Error getting all films", e);
+            responseObserver.onError(e);
+        }
+    }
+
+    private Film convertToFilmProto(FilmMetadata film) {
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+        return Film.newBuilder()
+                .setFilmId(film.getId().toString())
+                .setName(film.getName())
+                .setDescription(film.getDescription() != null ? film.getDescription() : "")
+                .setAvailable(film.isAvailable())
+                .setCreatedAt(film.getCreatedAt() != null ? film.getCreatedAt().format(formatter) : "")
+                .setUpdatedAt(film.getUpdatedAt() != null ? film.getUpdatedAt().format(formatter) : "")
+                .build();
     }
 }
 

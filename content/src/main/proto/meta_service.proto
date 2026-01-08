@@ -14,10 +14,6 @@ service MetaService {
   rpc UpdateFilm(UpdateFilmRequest) returns (UpdateFilmResponse);
   
   rpc SetAvailability(SetAvailabilityRequest) returns (SetAvailabilityResponse);
-  
-  rpc GetFilm(GetFilmRequest) returns (GetFilmResponse);
-  
-  rpc GetAllFilms(GetAllFilmsRequest) returns (GetAllFilmsResponse);
 }
 
 message CreateFilmRequest {
@@ -56,27 +52,3 @@ message SetAvailabilityResponse {
   bool success = 1;
 }
 
-message GetFilmRequest {
-  string film_id = 1;
-}
-
-message GetFilmResponse {
-  bool found = 1;
-  Film film = 2;
-}
-
-message GetAllFilmsRequest {
-}
-
-message GetAllFilmsResponse {
-  repeated Film films = 1;
-}
-
-message Film {
-  string film_id = 1;
-  string name = 2;
-  string description = 3;
-  bool available = 4;
-  string created_at = 5;
-  string updated_at = 6;
-}
