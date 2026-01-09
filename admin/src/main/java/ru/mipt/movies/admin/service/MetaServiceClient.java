@@ -4,12 +4,11 @@ import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import ru.mipt.movies.admin.dto.FilmDto;
 import ru.mipt.movies.meta.proto.MetaServiceGrpc;
 import ru.mipt.movies.meta.proto.*;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -41,7 +40,7 @@ public class MetaServiceClient {
         }
     }
 
-    public Map<String, Object> getFilm(UUID filmId) {
+    public FilmDto getFilm(UUID filmId) {
         try {
             logger.info("Getting film from Meta Service: filmId={}", filmId);
 
@@ -57,16 +56,17 @@ public class MetaServiceClient {
             }
 
             Film film = response.getFilm();
-            Map<String, Object> filmMap = new HashMap<>();
-            filmMap.put("filmId", film.getFilmId());
-            filmMap.put("name", film.getName());
-            filmMap.put("description", film.getDescription());
-            filmMap.put("available", film.getAvailable());
-            filmMap.put("createdAt", film.getCreatedAt());
-            filmMap.put("updatedAt", film.getUpdatedAt());
+            FilmDto filmDto = new FilmDto(
+                    film.getFilmId(),
+                    film.getName(),
+                    film.getDescription(),
+                    film.getAvailable(),
+                    film.getCreatedAt(),
+                    film.getUpdatedAt()
+            );
 
             logger.info("Film retrieved successfully: filmId={}", filmId);
-            return filmMap;
+            return filmDto;
         } catch (Exception e) {
             logger.error("Error getting film from Meta Service: filmId={}", filmId, e);
             throw new RuntimeException("Failed to get film from Meta Service", e);
@@ -115,24 +115,22 @@ public class MetaServiceClient {
         }
     }
 
-    public List<Map<String, Object>> getAllFilms() {
+    public List<FilmDto> getAllFilms() {
         try {
             logger.info("Getting all films from Meta Service");
 
             GetAllFilmsRequest request = GetAllFilmsRequest.newBuilder().build();
             GetAllFilmsResponse response = metaServiceStub.getAllFilms(request);
 
-            List<Map<String, Object>> films = response.getFilmsList().stream()
-                    .map(film -> {
-                        Map<String, Object> filmMap = new HashMap<>();
-                        filmMap.put("filmId", film.getFilmId());
-                        filmMap.put("name", film.getName());
-                        filmMap.put("description", film.getDescription());
-                        filmMap.put("available", film.getAvailable());
-                        filmMap.put("createdAt", film.getCreatedAt());
-                        filmMap.put("updatedAt", film.getUpdatedAt());
-                        return filmMap;
-                    })
+            List<FilmDto> films = response.getFilmsList().stream()
+                    .map(film -> new FilmDto(
+                            film.getFilmId(),
+                            film.getName(),
+                            film.getDescription(),
+                            film.getAvailable(),
+                            film.getCreatedAt(),
+                            film.getUpdatedAt()
+                    ))
                     .collect(Collectors.toList());
 
             logger.info("Retrieved {} films successfully", films.size());

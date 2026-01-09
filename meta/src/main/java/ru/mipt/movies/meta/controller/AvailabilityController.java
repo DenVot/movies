@@ -6,13 +6,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.mipt.movies.meta.dto.AvailabilityResponse;
+import ru.mipt.movies.meta.dto.FilmResponse;
 import ru.mipt.movies.meta.model.FilmMetadata;
 import ru.mipt.movies.meta.repository.FilmMetadataRepository;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -26,18 +26,19 @@ public class AvailabilityController {
     }
 
     @GetMapping("/{filmId}")
-    public ResponseEntity<Map<String, Object>> getFilm(@PathVariable String filmId) {
+    public ResponseEntity<FilmResponse> getFilm(@PathVariable String filmId) {
         try {
             UUID id = UUID.fromString(filmId);
             return repository.findById(id)
                     .map(film -> {
-                        Map<String, Object> response = new HashMap<>();
-                        response.put("filmId", film.getId().toString());
-                        response.put("name", film.getName());
-                        response.put("description", film.getDescription());
-                        response.put("available", film.isAvailable());
-                        response.put("createdAt", film.getCreatedAt());
-                        response.put("updatedAt", film.getUpdatedAt());
+                        FilmResponse response = new FilmResponse(
+                                film.getId().toString(),
+                                film.getName(),
+                                film.getDescription(),
+                                film.isAvailable(),
+                                film.getCreatedAt(),
+                                film.getUpdatedAt()
+                        );
                         return ResponseEntity.ok(response);
                     })
                     .orElse(ResponseEntity.notFound().build());
@@ -47,15 +48,14 @@ public class AvailabilityController {
     }
 
     @GetMapping("/{filmId}/availability")
-    public ResponseEntity<Map<String, Boolean>> checkAvailability(@PathVariable String filmId) {
+    public ResponseEntity<AvailabilityResponse> checkAvailability(@PathVariable String filmId) {
         try {
             UUID id = UUID.fromString(filmId);
             boolean isAvailable = repository.findById(id)
                     .map(FilmMetadata::isAvailable)
                     .orElse(false);
 
-            Map<String, Boolean> response = new HashMap<>();
-            response.put("available", isAvailable);
+            AvailabilityResponse response = new AvailabilityResponse(isAvailable);
 
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
@@ -64,20 +64,21 @@ public class AvailabilityController {
     }
 
     @GetMapping("/available")
-    public ResponseEntity<List<Map<String, Object>>> getAvailableFilms() {
+    public ResponseEntity<List<FilmResponse>> getAvailableFilms() {
         try {
             List<FilmMetadata> availableFilms = repository.findByIsAvailableTrue();
 
-            List<Map<String, Object>> response = new ArrayList<>();
+            List<FilmResponse> response = new ArrayList<>();
             for (FilmMetadata film : availableFilms) {
-                Map<String, Object> filmData = new HashMap<>();
-                filmData.put("filmId", film.getId().toString());
-                filmData.put("name", film.getName());
-                filmData.put("description", film.getDescription());
-                filmData.put("available", film.isAvailable());
-                filmData.put("createdAt", film.getCreatedAt());
-                filmData.put("updatedAt", film.getUpdatedAt());
-                response.add(filmData);
+                FilmResponse filmResponse = new FilmResponse(
+                        film.getId().toString(),
+                        film.getName(),
+                        film.getDescription(),
+                        film.isAvailable(),
+                        film.getCreatedAt(),
+                        film.getUpdatedAt()
+                );
+                response.add(filmResponse);
             }
 
             return ResponseEntity.ok(response);
@@ -87,20 +88,21 @@ public class AvailabilityController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Map<String, Object>>> getAllFilms() {
+    public ResponseEntity<List<FilmResponse>> getAllFilms() {
         try {
             List<FilmMetadata> allFilms = repository.findAll();
 
-            List<Map<String, Object>> response = new ArrayList<>();
+            List<FilmResponse> response = new ArrayList<>();
             for (FilmMetadata film : allFilms) {
-                Map<String, Object> filmData = new HashMap<>();
-                filmData.put("filmId", film.getId().toString());
-                filmData.put("name", film.getName());
-                filmData.put("description", film.getDescription());
-                filmData.put("available", film.isAvailable());
-                filmData.put("createdAt", film.getCreatedAt());
-                filmData.put("updatedAt", film.getUpdatedAt());
-                response.add(filmData);
+                FilmResponse filmResponse = new FilmResponse(
+                        film.getId().toString(),
+                        film.getName(),
+                        film.getDescription(),
+                        film.isAvailable(),
+                        film.getCreatedAt(),
+                        film.getUpdatedAt()
+                );
+                response.add(filmResponse);
             }
 
             return ResponseEntity.ok(response);
