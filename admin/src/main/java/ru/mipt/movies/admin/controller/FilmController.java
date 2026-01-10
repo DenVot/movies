@@ -6,13 +6,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import ru.mipt.movies.admin.dto.*;
 import ru.mipt.movies.admin.service.KafkaVideoProducer;
 import ru.mipt.movies.admin.service.MetaServiceClient;
 import ru.mipt.movies.admin.service.MinIOService;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -36,70 +35,56 @@ public class FilmController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Map<String, Object>>> getAllFilms() {
+    public ResponseEntity<List<FilmDto>> getAllFilms() {
         try {
-            List<Map<String, Object>> films = metaServiceClient.getAllFilms();
-
+            List<FilmDto> films = metaServiceClient.getAllFilms();
             return ResponseEntity.ok(films);
         } catch (Exception e) {
             logger.error("Error getting all films", e);
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Failed to get films: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(List.of(errorResponse));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
     @PostMapping
-    public ResponseEntity<Map<String, Object>> createFilm(@RequestBody CreateFilmRequest request) {
+    public ResponseEntity<CreateFilmResponse> createFilm(@RequestBody CreateFilmRequest request) {
         try {
             logger.info("Creating film: name={}, description={}", request.getName(), request.getDescription());
 
             UUID filmId = metaServiceClient.createFilm(request.getName(), request.getDescription());
 
-            Map<String, Object> response = new HashMap<>();
-            response.put("filmId", filmId.toString());
-            response.put("message", "Film created successfully");
+            CreateFilmResponse response = new CreateFilmResponse(filmId.toString(), "Film created successfully");
 
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (Exception e) {
             logger.error("Error creating film", e);
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Failed to create film: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
     @GetMapping("/{filmId}")
-    public ResponseEntity<Map<String, Object>> getFilm(@PathVariable String filmId) {
+    public ResponseEntity<FilmDto> getFilm(@PathVariable String filmId) {
         try {
             logger.info("Getting film: filmId={}", filmId);
 
             UUID filmUuid = UUID.fromString(filmId);
-            Map<String, Object> film = metaServiceClient.getFilm(filmUuid);
+            FilmDto film = metaServiceClient.getFilm(filmUuid);
 
             if (film == null) {
-                Map<String, Object> errorResponse = new HashMap<>();
-                errorResponse.put("error", "Film not found");
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
             }
 
             return ResponseEntity.ok(film);
         } catch (IllegalArgumentException e) {
             logger.error("Invalid film ID format: {}", filmId, e);
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Invalid film ID format");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         } catch (Exception e) {
             logger.error("Error getting film: filmId={}", filmId, e);
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Failed to get film: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
     @PutMapping("/{filmId}")
-    public ResponseEntity<Map<String, Object>> updateFilm(
+    public ResponseEntity<UpdateFilmResponse> updateFilm(
             @PathVariable String filmId,
             @RequestBody UpdateFilmRequest request) {
         try {
@@ -113,31 +98,23 @@ public class FilmController {
                     request.getDescription());
 
             if (!success) {
-                Map<String, Object> errorResponse = new HashMap<>();
-                errorResponse.put("error", "Film not found");
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
             }
 
-            Map<String, Object> response = new HashMap<>();
-            response.put("message", "Film updated successfully");
-            response.put("filmId", filmId);
+            UpdateFilmResponse response = new UpdateFilmResponse("Film updated successfully", filmId);
 
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
             logger.error("Invalid film ID format: {}", filmId, e);
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Invalid film ID format");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         } catch (Exception e) {
             logger.error("Error updating film: filmId={}", filmId, e);
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Failed to update film: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
     @DeleteMapping("/{filmId}")
-    public ResponseEntity<Map<String, Object>> deleteFilm(@PathVariable String filmId) {
+    public ResponseEntity<DeleteFilmResponse> deleteFilm(@PathVariable String filmId) {
         try {
             logger.info("Deleting film: filmId={}", filmId);
 
@@ -145,31 +122,23 @@ public class FilmController {
             boolean success = metaServiceClient.deleteFilm(filmUuid);
 
             if (!success) {
-                Map<String, Object> errorResponse = new HashMap<>();
-                errorResponse.put("error", "Film not found");
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
             }
 
-            Map<String, Object> response = new HashMap<>();
-            response.put("message", "Film deleted successfully");
-            response.put("filmId", filmId);
+            DeleteFilmResponse response = new DeleteFilmResponse("Film deleted successfully", filmId);
 
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
             logger.error("Invalid film ID format: {}", filmId, e);
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Invalid film ID format");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         } catch (Exception e) {
             logger.error("Error deleting film: filmId={}", filmId, e);
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Failed to delete film: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
     @PostMapping("/{filmId}/video")
-    public ResponseEntity<Map<String, Object>> uploadVideo(
+    public ResponseEntity<VideoUploadResponse> uploadVideo(
             @PathVariable String filmId,
             @RequestParam("file") MultipartFile file) {
         try {
@@ -180,11 +149,9 @@ public class FilmController {
 
             UUID filmUuid = UUID.fromString(filmId);
 
-            Map<String, Object> film = metaServiceClient.getFilm(filmUuid);
+            FilmDto film = metaServiceClient.getFilm(filmUuid);
             if (film == null) {
-                Map<String, Object> errorResponse = new HashMap<>();
-                errorResponse.put("error", "Film not found");
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
             }
 
             String objectName = minIOService.uploadVideo(
@@ -196,28 +163,25 @@ public class FilmController {
             
             kafkaVideoProducer.sendFilmId(filmUuid);
 
-            Map<String, Object> response = new HashMap<>();
-            response.put("message", "Video uploaded successfully");
-            response.put("filmId", filmId);
-            response.put("objectName", objectName);
-            response.put("size", file.getSize());
+            VideoUploadResponse response = new VideoUploadResponse(
+                    "Video uploaded successfully", 
+                    filmId, 
+                    objectName, 
+                    file.getSize()
+            );
 
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (IllegalArgumentException e) {
             logger.error("Invalid film ID format: {}", filmId, e);
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Invalid film ID format");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         } catch (Exception e) {
             logger.error("Error uploading video for film ID: {}", filmId, e);
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Failed to upload video: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
     @PutMapping("/{filmId}/video")
-    public ResponseEntity<Map<String, Object>> replaceVideo(
+    public ResponseEntity<VideoUploadResponse> replaceVideo(
             @PathVariable String filmId,
             @RequestParam("file") MultipartFile file) {
         try {
@@ -228,11 +192,9 @@ public class FilmController {
 
             UUID filmUuid = UUID.fromString(filmId);
 
-            Map<String, Object> film = metaServiceClient.getFilm(filmUuid);
+            FilmDto film = metaServiceClient.getFilm(filmUuid);
             if (film == null) {
-                Map<String, Object> errorResponse = new HashMap<>();
-                errorResponse.put("error", "Film not found");
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
             }
 
             String objectName = minIOService.replaceVideo(
@@ -243,57 +205,46 @@ public class FilmController {
 
             kafkaVideoProducer.sendFilmId(filmUuid);
 
-            Map<String, Object> response = new HashMap<>();
-            response.put("message", "Video replaced successfully");
-            response.put("filmId", filmId);
-            response.put("objectName", objectName);
-            response.put("size", file.getSize());
+            VideoUploadResponse response = new VideoUploadResponse(
+                    "Video replaced successfully", 
+                    filmId, 
+                    objectName, 
+                    file.getSize()
+            );
 
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
             logger.error("Invalid film ID format: {}", filmId, e);
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Invalid film ID format");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         } catch (Exception e) {
             logger.error("Error replacing video for film ID: {}", filmId, e);
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Failed to replace video: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
     @DeleteMapping("/{filmId}/video")
-    public ResponseEntity<Map<String, Object>> deleteVideo(@PathVariable String filmId) {
+    public ResponseEntity<DeleteVideoResponse> deleteVideo(@PathVariable String filmId) {
         try {
             logger.info("Deleting video for film ID: {}", filmId);
 
             UUID filmUuid = UUID.fromString(filmId);
 
-            Map<String, Object> film = metaServiceClient.getFilm(filmUuid);
+            FilmDto film = metaServiceClient.getFilm(filmUuid);
             if (film == null) {
-                Map<String, Object> errorResponse = new HashMap<>();
-                errorResponse.put("error", "Film not found");
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
             }
 
             minIOService.deleteVideo(filmUuid);
 
-            Map<String, Object> response = new HashMap<>();
-            response.put("message", "Video deleted successfully");
-            response.put("filmId", filmId);
+            DeleteVideoResponse response = new DeleteVideoResponse("Video deleted successfully", filmId);
 
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
             logger.error("Invalid film ID format: {}", filmId, e);
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Invalid film ID format");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         } catch (Exception e) {
             logger.error("Error deleting video for film ID: {}", filmId, e);
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Failed to delete video: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 

@@ -13,6 +13,20 @@ services:
     networks:
       - movies-network
 
+  postgres-auth:
+    image: postgres:16-alpine
+    container_name: postgres-auth
+    environment:
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: auth_user
+      POSTGRES_PASSWORD: auth_password
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_auth_data:/var/lib/postgresql/data
+    networks:
+      - movies-network
+
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
     container_name: zookeeper
@@ -60,6 +74,25 @@ services:
       SPRING_DATASOURCE_PASSWORD: postgres
       GRPC_SERVER_PORT: 9090
       SERVER_PORT: 8080
+      JWT_SECRET: defaultSecretKeyForJWTTokenGenerationThatShouldBeAtLeast256BitsLongForSecurityPurposes
+    networks:
+      - movies-network
+
+  auth:
+    build:
+      context: ./auth
+      dockerfile: Dockerfile
+    container_name: auth
+    depends_on:
+      - postgres-auth
+    ports:
+      - "8084:8084"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-auth:5432/auth_db
+      SPRING_DATASOURCE_USERNAME: auth_user
+      SPRING_DATASOURCE_PASSWORD: auth_password
+      SERVER_PORT: 8084
+      JWT_SECRET: defaultSecretKeyForJWTTokenGenerationThatShouldBeAtLeast256BitsLongForSecurityPurposes
     networks:
       - movies-network
 
@@ -101,6 +134,7 @@ services:
       MINIO_ENDPOINT: http://minio:9000
       MINIO_ACCESS_KEY: minioadmin
       MINIO_SECRET_KEY: minioadmin
+      JWT_SECRET: defaultSecretKeyForJWTTokenGenerationThatShouldBeAtLeast256BitsLongForSecurityPurposes
     networks:
       - movies-network
 
@@ -136,11 +170,13 @@ services:
       MINIO_ENDPOINT: http://minio:9000
       MINIO_ACCESS_KEY: minioadmin
       MINIO_SECRET_KEY: minioadmin
+      JWT_SECRET: defaultSecretKeyForJWTTokenGenerationThatShouldBeAtLeast256BitsLongForSecurityPurposes
     networks:
       - movies-network
 
 volumes:
   postgres_data:
+  postgres_auth_data:
   minio_data:
 
 networks:
