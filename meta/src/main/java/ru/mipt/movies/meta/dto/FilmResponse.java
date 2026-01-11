@@ -1,5 +1,6 @@
 package ru.mipt.movies.meta.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDateTime;
 
 public class FilmResponse {
@@ -7,6 +8,7 @@ public class FilmResponse {
     private String name;
     private String description;
     private Boolean available;
+    private Long duration;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -14,11 +16,12 @@ public class FilmResponse {
     }
 
     public FilmResponse(String filmId, String name, String description, Boolean available, 
-                       LocalDateTime createdAt, LocalDateTime updatedAt) {
+                       Long duration, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.filmId = filmId;
         this.name = name;
         this.description = description;
         this.available = available;
+        this.duration = duration;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -69,5 +72,14 @@ public class FilmResponse {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    @JsonProperty("durationSeconds")
+    public Long getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Long duration) {
+        this.duration = duration;
     }
 }

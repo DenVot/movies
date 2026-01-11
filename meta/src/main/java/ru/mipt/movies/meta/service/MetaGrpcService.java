@@ -29,22 +29,22 @@ public class MetaGrpcService extends MetaServiceGrpc.MetaServiceImplBase {
     public void createFilm(CreateFilmRequest request, StreamObserver<CreateFilmResponse> responseObserver) {
         try {
             logger.info("Creating film with name: {}", request.getName());
-            
+
             FilmMetadata film = new FilmMetadata();
             film.setName(request.getName());
             film.setDescription(request.getDescription());
             film.setAvailable(false);
-            
+
             FilmMetadata savedFilm = repository.save(film);
             UUID filmId = savedFilm.getId();
-            
+
             CreateFilmResponse response = CreateFilmResponse.newBuilder()
                     .setFilmId(filmId.toString())
                     .build();
-            
+
             responseObserver.onNext(response);
             responseObserver.onCompleted();
-            
+
             logger.info("Film created successfully with ID: {}", filmId);
         } catch (Exception e) {
             logger.error("Error creating film", e);
@@ -57,19 +57,19 @@ public class MetaGrpcService extends MetaServiceGrpc.MetaServiceImplBase {
         try {
             UUID filmId = UUID.fromString(request.getFilmId());
             logger.info("Deleting film with ID: {}", filmId);
-            
+
             boolean exists = repository.existsById(filmId);
             if (exists) {
                 repository.deleteById(filmId);
             }
-            
+
             DeleteFilmResponse response = DeleteFilmResponse.newBuilder()
                     .setSuccess(exists)
                     .build();
-            
+
             responseObserver.onNext(response);
             responseObserver.onCompleted();
-            
+
             logger.info("Film deletion result: {}", exists);
         } catch (Exception e) {
             logger.error("Error deleting film", e);
@@ -82,7 +82,7 @@ public class MetaGrpcService extends MetaServiceGrpc.MetaServiceImplBase {
         try {
             UUID filmId = UUID.fromString(request.getFilmId());
             logger.info("Updating film with ID: {}", filmId);
-            
+
             FilmMetadata film = repository.findById(filmId).orElse(null);
             if (film == null) {
                 UpdateFilmResponse response = UpdateFilmResponse.newBuilder()
@@ -93,23 +93,23 @@ public class MetaGrpcService extends MetaServiceGrpc.MetaServiceImplBase {
                 logger.warn("Film with ID {} not found", filmId);
                 return;
             }
-            
+
             if (request.getName() != null && !request.getName().isEmpty()) {
                 film.setName(request.getName());
             }
             if (request.getDescription() != null && !request.getDescription().isEmpty()) {
                 film.setDescription(request.getDescription());
             }
-            
+
             repository.save(film);
-            
+
             UpdateFilmResponse response = UpdateFilmResponse.newBuilder()
                     .setSuccess(true)
                     .build();
-            
+
             responseObserver.onNext(response);
             responseObserver.onCompleted();
-            
+
             logger.info("Film update result: true");
         } catch (Exception e) {
             logger.error("Error updating film", e);
@@ -118,11 +118,12 @@ public class MetaGrpcService extends MetaServiceGrpc.MetaServiceImplBase {
     }
 
     @Override
-    public void setAvailability(SetAvailabilityRequest request, StreamObserver<SetAvailabilityResponse> responseObserver) {
+    public void setAvailability(SetAvailabilityRequest request,
+            StreamObserver<SetAvailabilityResponse> responseObserver) {
         try {
             UUID filmId = UUID.fromString(request.getFilmId());
             logger.info("Setting availability for film ID: {} to {}", filmId, request.getIsAvailable());
-            
+
             FilmMetadata film = repository.findById(filmId).orElse(null);
             if (film == null) {
                 SetAvailabilityResponse response = SetAvailabilityResponse.newBuilder()
@@ -133,17 +134,17 @@ public class MetaGrpcService extends MetaServiceGrpc.MetaServiceImplBase {
                 logger.warn("Film with ID {} not found", filmId);
                 return;
             }
-            
+
             film.setAvailable(request.getIsAvailable());
             repository.save(film);
-            
+
             SetAvailabilityResponse response = SetAvailabilityResponse.newBuilder()
                     .setSuccess(true)
                     .build();
-            
+
             responseObserver.onNext(response);
             responseObserver.onCompleted();
-            
+
             logger.info("Availability update result: true");
         } catch (Exception e) {
             logger.error("Error setting availability", e);
@@ -208,6 +209,40 @@ public class MetaGrpcService extends MetaServiceGrpc.MetaServiceImplBase {
         }
     }
 
+    @Override
+    public void setDuration(SetDurationRequest request, StreamObserver<SetDurationResponse> responseObserver) {
+        try {
+            UUID filmId = UUID.fromString(request.getFilmId());
+            logger.info("Setting duration for film ID: {} to {} seconds", filmId, request.getDurationSeconds());
+
+            FilmMetadata film = repository.findById(filmId).orElse(null);
+            if (film == null) {
+                SetDurationResponse response = SetDurationResponse.newBuilder()
+                        .setSuccess(false)
+                        .build();
+                responseObserver.onNext(response);
+                responseObserver.onCompleted();
+                logger.warn("Film with ID {} not found", filmId);
+                return;
+            }
+
+            film.setDuration((long) request.getDurationSeconds());
+            repository.save(film);
+
+            SetDurationResponse response = SetDurationResponse.newBuilder()
+                    .setSuccess(true)
+                    .build();
+
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+
+            logger.info("Duration set successfully for film ID: {}", filmId);
+        } catch (Exception e) {
+            logger.error("Error setting duration for film ID: {}", request.getFilmId(), e);
+            responseObserver.onError(e);
+        }
+    }
+
     private Film convertToFilmProto(FilmMetadata film) {
         DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
         return Film.newBuilder()
@@ -215,9 +250,9 @@ public class MetaGrpcService extends MetaServiceGrpc.MetaServiceImplBase {
                 .setName(film.getName())
                 .setDescription(film.getDescription() != null ? film.getDescription() : "")
                 .setAvailable(film.isAvailable())
+                .setDurationSeconds(film.getDuration() != null ? film.getDuration().intValue() : 0)
                 .setCreatedAt(film.getCreatedAt() != null ? film.getCreatedAt().format(formatter) : "")
                 .setUpdatedAt(film.getUpdatedAt() != null ? film.getUpdatedAt().format(formatter) : "")
                 .build();
     }
 }
-

@@ -7,18 +7,20 @@ public class FilmDto {
     private Boolean available;
     private String createdAt;
     private String updatedAt;
+    private Integer durationSeconds;
 
     public FilmDto() {
     }
 
     public FilmDto(String filmId, String name, String description, Boolean available, 
-                   String createdAt, String updatedAt) {
+                   String createdAt, String updatedAt, Integer durationSeconds) {
         this.filmId = filmId;
         this.name = name;
         this.description = description;
         this.available = available;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.durationSeconds = durationSeconds;
     }
 
     public String getFilmId() {
@@ -67,5 +69,13 @@ public class FilmDto {
 
     public void setUpdatedAt(String updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public Integer getDurationSeconds() {
+        return durationSeconds;
+    }
+
+    public void setDurationSeconds(Integer durationSeconds) {
+        this.durationSeconds = durationSeconds;
     }
 }

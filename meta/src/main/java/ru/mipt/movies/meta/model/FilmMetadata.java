@@ -20,6 +20,9 @@ public class FilmMetadata {
     @Column(name = "is_available", nullable = false)
     private boolean isAvailable;
     
+    @Column(name = "duration", nullable = true)
+    private Long duration;
+    
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
     
@@ -102,6 +105,14 @@ public class FilmMetadata {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public Long getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Long duration) {
+        this.duration = duration;
     }
 }
 

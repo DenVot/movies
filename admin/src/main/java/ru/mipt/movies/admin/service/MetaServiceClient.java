@@ -23,15 +23,15 @@ public class MetaServiceClient {
     public UUID createFilm(String name, String description) {
         try {
             logger.info("Creating film in Meta Service: name={}, description={}", name, description);
-            
+
             CreateFilmRequest request = CreateFilmRequest.newBuilder()
                     .setName(name)
                     .setDescription(description)
                     .build();
-            
+
             CreateFilmResponse response = metaServiceStub.createFilm(request);
             UUID filmId = UUID.fromString(response.getFilmId());
-            
+
             logger.info("Film created successfully with ID: {}", filmId);
             return filmId;
         } catch (Exception e) {
@@ -62,8 +62,8 @@ public class MetaServiceClient {
                     film.getDescription(),
                     film.getAvailable(),
                     film.getCreatedAt(),
-                    film.getUpdatedAt()
-            );
+                    film.getUpdatedAt(),
+                    film.getDurationSeconds());
 
             logger.info("Film retrieved successfully: filmId={}", filmId);
             return filmDto;
@@ -129,8 +129,8 @@ public class MetaServiceClient {
                             film.getDescription(),
                             film.getAvailable(),
                             film.getCreatedAt(),
-                            film.getUpdatedAt()
-                    ))
+                            film.getUpdatedAt(),
+                            film.getDurationSeconds()))
                     .collect(Collectors.toList());
 
             logger.info("Retrieved {} films successfully", films.size());
@@ -138,6 +138,25 @@ public class MetaServiceClient {
         } catch (Exception e) {
             logger.error("Error getting all films from Meta Service", e);
             throw new RuntimeException("Failed to get all films from Meta Service", e);
+        }
+    }
+
+    public boolean setDuration(UUID filmId, int durationSeconds) {
+        try {
+            logger.info("Setting duration in Meta Service: filmId={}, durationSeconds={}", filmId, durationSeconds);
+
+            SetDurationRequest request = SetDurationRequest.newBuilder()
+                    .setFilmId(filmId.toString())
+                    .setDurationSeconds(durationSeconds)
+                    .build();
+
+            SetDurationResponse response = metaServiceStub.setDuration(request);
+
+            logger.info("Duration update result: filmId={}, success={}", filmId, response.getSuccess());
+            return response.getSuccess();
+        } catch (Exception e) {
+            logger.error("Error setting duration in Meta Service: filmId={}", filmId, e);
+            throw new RuntimeException("Failed to set duration in Meta Service", e);
         }
     }
 }

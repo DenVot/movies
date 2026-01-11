@@ -27,8 +27,7 @@ public class VideoStreamController {
 
     public VideoStreamController(
             MinIOService minIOService,
-            VideoProcessingService videoProcessingService
-    ) {
+            VideoProcessingService videoProcessingService) {
         this.minIOService = minIOService;
         this.videoProcessingService = videoProcessingService;
     }
@@ -139,7 +138,7 @@ public class VideoStreamController {
     @GetMapping("/{filmId}/qualities")
     public ResponseEntity<List<String>> getAvailableQualities(@PathVariable String filmId) {
         try {
-            UUID.fromString(filmId); // Validate UUID format
+            UUID.fromString(filmId);
             List<String> qualities = videoProcessingService.getAvailableQualities();
             return ResponseEntity.ok(qualities);
         } catch (IllegalArgumentException e) {

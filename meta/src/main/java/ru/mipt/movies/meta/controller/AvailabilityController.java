@@ -36,6 +36,7 @@ public class AvailabilityController {
                                 film.getName(),
                                 film.getDescription(),
                                 film.isAvailable(),
+                                film.getDuration(),
                                 film.getCreatedAt(),
                                 film.getUpdatedAt()
                         );
@@ -75,6 +76,7 @@ public class AvailabilityController {
                         film.getName(),
                         film.getDescription(),
                         film.isAvailable(),
+                        film.getDuration(),
                         film.getCreatedAt(),
                         film.getUpdatedAt()
                 );
@@ -99,6 +101,7 @@ public class AvailabilityController {
                         film.getName(),
                         film.getDescription(),
                         film.isAvailable(),
+                        film.getDuration(),
                         film.getCreatedAt(),
                         film.getUpdatedAt()
                 );

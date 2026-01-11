@@ -18,6 +18,8 @@ service MetaService {
   rpc GetFilm(GetFilmRequest) returns (GetFilmResponse);
   
   rpc GetAllFilms(GetAllFilmsRequest) returns (GetAllFilmsResponse);
+  
+  rpc SetDuration(SetDurationRequest) returns (SetDurationResponse);
 }
 
 message CreateFilmRequest {
@@ -79,4 +81,14 @@ message Film {
   bool available = 4;
   string created_at = 5;
   string updated_at = 6;
+  int32 duration_seconds = 7;
+}
+
+message SetDurationRequest {
+  string film_id = 1;
+  int32 duration_seconds = 2;
+}
+
+message SetDurationResponse {
+  bool success = 1;
 }
