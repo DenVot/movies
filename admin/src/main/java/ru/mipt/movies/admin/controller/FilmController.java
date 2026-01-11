@@ -10,6 +10,7 @@ import ru.mipt.movies.admin.dto.*;
 import ru.mipt.movies.admin.service.KafkaVideoProducer;
 import ru.mipt.movies.admin.service.MetaServiceClient;
 import ru.mipt.movies.admin.service.MinIOService;
+import ru.mipt.movies.admin.service.VideoDurationExtractor;
 
 import java.util.List;
 import java.util.UUID;
@@ -23,15 +24,17 @@ public class FilmController {
     private final MetaServiceClient metaServiceClient;
     private final KafkaVideoProducer kafkaVideoProducer;
     private final MinIOService minIOService;
+    private final VideoDurationExtractor videoDurationExtractor;
 
     public FilmController(
             MetaServiceClient metaServiceClient,
             KafkaVideoProducer kafkaVideoProducer,
-            MinIOService minIOService
-    ) {
+            MinIOService minIOService,
+            VideoDurationExtractor videoDurationExtractor) {
         this.metaServiceClient = metaServiceClient;
         this.kafkaVideoProducer = kafkaVideoProducer;
         this.minIOService = minIOService;
+        this.videoDurationExtractor = videoDurationExtractor;
     }
 
     @GetMapping
@@ -154,21 +157,31 @@ public class FilmController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
             }
 
+            try {
+                int durationSeconds = videoDurationExtractor.extractDuration(file);
+                metaServiceClient.setDuration(filmUuid, durationSeconds);
+                logger.info("Set video duration for film ID {}: {} seconds", filmId, durationSeconds);
+            } catch (Exception e) {
+                logger.warn("Failed to extract or set video duration for film ID {}", filmId, e);
+            }
+
             String objectName = minIOService.uploadVideo(
-                    filmUuid, 
-                    file.getInputStream(), 
-                    file.getSize(), 
-                    file.getContentType()
-            );
-            
-            kafkaVideoProducer.sendFilmId(filmUuid);
+                    filmUuid,
+                    file.getInputStream(),
+                    file.getSize(),
+                    file.getContentType());
+
+            try {
+                kafkaVideoProducer.sendFilmId(filmUuid);
+            } catch (Exception e) {
+                logger.warn("Failed to send film ID to Kafka for film ID {}", filmId, e);
+            }
 
             VideoUploadResponse response = new VideoUploadResponse(
-                    "Video uploaded successfully", 
-                    filmId, 
-                    objectName, 
-                    file.getSize()
-            );
+                    "Video uploaded successfully",
+                    filmId,
+                    objectName,
+                    file.getSize());
 
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (IllegalArgumentException e) {
@@ -197,20 +210,31 @@ public class FilmController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
             }
 
+            try {
+                int durationSeconds = videoDurationExtractor.extractDuration(file);
+                metaServiceClient.setDuration(filmUuid, durationSeconds);
+                logger.info("Set video duration for film ID {}: {} seconds", filmId, durationSeconds);
+            } catch (Exception e) {
+                logger.warn("Failed to extract or set video duration for film ID {}", filmId, e);
+            }
+
             String objectName = minIOService.replaceVideo(
                     filmUuid,
                     file.getInputStream(),
                     file.getSize(),
                     file.getContentType());
 
-            kafkaVideoProducer.sendFilmId(filmUuid);
+            try {
+                kafkaVideoProducer.sendFilmId(filmUuid);
+            } catch (Exception e) {
+                logger.warn("Failed to send film ID to Kafka for film ID {}", filmId, e);
+            }
 
             VideoUploadResponse response = new VideoUploadResponse(
-                    "Video replaced successfully", 
-                    filmId, 
-                    objectName, 
-                    file.getSize()
-            );
+                    "Video replaced successfully",
+                    filmId,
+                    objectName,
+                    file.getSize());
 
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
@@ -247,7 +271,6 @@ public class FilmController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
-
 
     private void validateVideoFile(MultipartFile file) {
         if (file.isEmpty()) {

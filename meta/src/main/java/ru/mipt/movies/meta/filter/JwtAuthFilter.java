@@ -25,13 +25,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        // GET requests are public
         if (HttpMethod.GET.matches(request.getMethod())) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // Other methods require ADMIN role
         String token = getJwtFromCookie(request);
 
         if (token == null || !jwtUtil.validateToken(token)) {
