@@ -270,8 +270,8 @@ services:
       admin:
         condition: service_healthy
     ports:
-      - "3000:80"
-      - "3443:443"
+      - "80:80"
+      - "443:443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - ./nginx/ssl:/etc/nginx/ssl:ro
