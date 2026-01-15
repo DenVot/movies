@@ -49,3 +49,7 @@ coverage/
 
 .eslintcache
 .cache/
+
+nginx/ssl/*.key
+nginx/ssl/*.pem
+nginx/ssl/*.crt

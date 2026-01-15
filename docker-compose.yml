@@ -271,12 +271,14 @@ services:
         condition: service_healthy
     ports:
       - "3000:80"
+      - "3443:443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
     networks:
       - movies-network
     healthcheck:
-      test: [ "CMD-SHELL", "curl -f http://localhost" ]
+      test: [ "CMD-SHELL", "curl -f -k https://localhost || curl -f http://localhost" ]
       interval: 5s
       timeout: 5s
       retries: 20
