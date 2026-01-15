@@ -26,7 +26,7 @@ export default function Home() {
     return (
       <Container>
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
-          <Typography>Loading...</Typography>
+          <Typography>Загрузка...</Typography>
         </Box>
       </Container>
     );
@@ -37,17 +37,17 @@ export default function Home() {
       <Container>
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', gap: 2 }}>
           <Typography variant="h3" component="h1" gutterBottom>
-            Welcome to Online Cinema
+            Добро пожаловать в Онлайн Кинотеатр
           </Typography>
           <Typography variant="body1" color="text.secondary" gutterBottom>
-            Please login or register to watch movies
+            Пожалуйста, войдите или зарегистрируйтесь, чтобы смотреть фильмы
           </Typography>
           <Box sx={{ display: 'flex', gap: 2 }}>
             <Button variant="contained" onClick={() => router.push('/login')}>
-              Login
+              Войти
             </Button>
             <Button variant="outlined" onClick={() => router.push('/register')}>
-              Register
+              Зарегистрироваться
             </Button>
           </Box>
         </Box>
@@ -58,12 +58,12 @@ export default function Home() {
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
       <Typography variant="h4" component="h1" gutterBottom>
-        Available Movies
+        Доступные фильмы
       </Typography>
       {filmsLoading ? (
-        <Typography>Loading films...</Typography>
+        <Typography>Загрузка фильмов...</Typography>
       ) : films.length === 0 ? (
-        <Typography>No films available</Typography>
+        <Typography>Нет доступных фильмов</Typography>
       ) : (
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' }, gap: 3, mt: 3 }}>
           {films.map((film) => (

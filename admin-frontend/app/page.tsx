@@ -24,7 +24,7 @@ export default function AdminHome() {
     return (
       <Container>
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
-          <Typography>Loading...</Typography>
+          <Typography>Загрузка...</Typography>
         </Box>
       </Container>
     );
@@ -37,7 +37,7 @@ export default function AdminHome() {
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
       <Typography variant="h4" component="h1" gutterBottom>
-        Films Management
+        Управление фильмами
       </Typography>
       <FilmsList />
     </Container>

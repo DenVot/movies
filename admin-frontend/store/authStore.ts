@@ -6,7 +6,7 @@ interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (username: string, password: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
 }
 
@@ -24,8 +24,13 @@ export const useAuthStore = create<AuthState>((set) => ({
       throw error;
     }
   },
-  logout: () => {
-    set({ user: null, isAuthenticated: false });
+  logout: async () => {
+    set({ user: null, isAuthenticated: false, isLoading: false });
+    try {
+      await authApi.logout();
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   },
   checkAuth: async () => {
     try {

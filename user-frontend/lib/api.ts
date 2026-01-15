@@ -54,6 +54,13 @@ export const authApi = {
     const response = await authClient.post('/login', data);
     return response.data;
   },
+  logout: async () => {
+    try {
+      await authClient.post('/logout');
+    } catch (error) {
+      console.error('Logout API error:', error);
+    }
+  },
   getCurrentUser: async (): Promise<UserInfo> => {
     const response = await authClient.get('/me');
     return response.data;

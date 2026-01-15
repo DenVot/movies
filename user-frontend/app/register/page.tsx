@@ -23,7 +23,7 @@ export default function RegisterPage() {
       await register(username, email, password);
       router.push('/');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+      setError(err.response?.data?.message || 'Ошибка регистрации. Попробуйте снова.');
     } finally {
       setLoading(false);
     }
@@ -33,7 +33,7 @@ export default function RegisterPage() {
     <Container maxWidth="sm">
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
         <Typography variant="h4" component="h1" gutterBottom>
-          Register
+          Регистрация
         </Typography>
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3, width: '100%' }}>
           {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
@@ -41,7 +41,7 @@ export default function RegisterPage() {
             margin="normal"
             required
             fullWidth
-            label="Username"
+            label="Имя пользователя"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             autoFocus
@@ -50,7 +50,7 @@ export default function RegisterPage() {
             margin="normal"
             required
             fullWidth
-            label="Email"
+            label="Электронная почта"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -59,7 +59,7 @@ export default function RegisterPage() {
             margin="normal"
             required
             fullWidth
-            label="Password"
+            label="Пароль"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -71,11 +71,11 @@ export default function RegisterPage() {
             sx={{ mt: 3, mb: 2 }}
             disabled={loading}
           >
-            {loading ? 'Registering...' : 'Register'}
+            {loading ? 'Регистрация...' : 'Зарегистрироваться'}
           </Button>
           <Box sx={{ textAlign: 'center' }}>
             <Link href="/login" variant="body2">
-              Already have an account? Login
+              Уже есть аккаунт? Войти
             </Link>
           </Box>
         </Box>

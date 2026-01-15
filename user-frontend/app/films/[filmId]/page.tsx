@@ -87,7 +87,7 @@ export default function FilmWatchPage() {
     return (
       <Container>
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
-          <Typography>Loading...</Typography>
+          <Typography>Загрузка...</Typography>
         </Box>
       </Container>
     );
@@ -97,9 +97,9 @@ export default function FilmWatchPage() {
     return (
       <Container>
         <Box sx={{ mt: 4 }}>
-          <Alert severity="error">Film not found</Alert>
+          <Alert severity="error">Фильм не найден</Alert>
           <Button onClick={() => router.push('/')} sx={{ mt: 2 }}>
-            Back to Home
+            На главную
           </Button>
         </Box>
       </Container>
@@ -109,7 +109,7 @@ export default function FilmWatchPage() {
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <Button onClick={() => router.push('/')} sx={{ mb: 2 }}>
-        Back to Home
+        На главную
       </Button>
       <Typography variant="h4" component="h1" gutterBottom>
         {selectedFilm.name}
@@ -119,17 +119,17 @@ export default function FilmWatchPage() {
       </Typography>
       {selectedFilm.durationSeconds !== undefined && selectedFilm.durationSeconds !== null && selectedFilm.durationSeconds > 0 && (
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          Duration: {formatDuration(selectedFilm.durationSeconds)}
+          Длительность: {formatDuration(selectedFilm.durationSeconds)}
         </Typography>
       )}
 
       {qualities.length > 0 && (
         <FormControl sx={{ minWidth: 200, mb: 2 }}>
-          <InputLabel>Quality</InputLabel>
+          <InputLabel>Качество</InputLabel>
           <Select
             value={selectedQuality}
-            label="Quality"
-            onChange={(e) => handleQualityChange(e.target.value)}
+            label="Качество"
+            onChange={(e: any) => handleQualityChange(e.target.value)}
             disabled={loadingQualities}
           >
             {qualities.map((quality) => (
@@ -154,7 +154,7 @@ export default function FilmWatchPage() {
           }}
           src={videoUrl}
         >
-          Your browser does not support the video tag.
+          Ваш браузер не поддерживает тег video.
         </video>
       </Box>
     </Container>

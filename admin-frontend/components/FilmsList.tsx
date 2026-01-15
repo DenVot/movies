@@ -41,7 +41,7 @@ export default function FilmsList() {
   }, [fetchFilms]);
 
   const handleDelete = async (filmId: string) => {
-    if (window.confirm('Are you sure you want to delete this film?')) {
+    if (window.confirm('Вы уверены, что хотите удалить этот фильм?')) {
       try {
         await deleteFilm(filmId);
       } catch (error) {
@@ -76,7 +76,7 @@ export default function FilmsList() {
           startIcon={<AddIcon />}
           onClick={() => setCreateDialogOpen(true)}
         >
-          Add Film
+          Добавить фильм
         </Button>
       </Box>
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
@@ -84,11 +84,11 @@ export default function FilmsList() {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Name</TableCell>
-              <TableCell>Description</TableCell>
-              <TableCell>Available</TableCell>
-              <TableCell>Created At</TableCell>
-              <TableCell align="right">Actions</TableCell>
+              <TableCell>Название</TableCell>
+              <TableCell>Описание</TableCell>
+              <TableCell>Доступен</TableCell>
+              <TableCell>Дата создания</TableCell>
+              <TableCell align="right">Действия</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -96,7 +96,7 @@ export default function FilmsList() {
               <TableRow key={film.filmId}>
                 <TableCell>{film.name}</TableCell>
                 <TableCell>{film.description || '-'}</TableCell>
-                <TableCell>{film.available ? 'Yes' : 'No'}</TableCell>
+                <TableCell>{film.available ? 'Да' : 'Нет'}</TableCell>
                 <TableCell>{new Date(film.createdAt).toLocaleDateString()}</TableCell>
                 <TableCell align="right">
                   <IconButton size="small" onClick={() => handleEdit(film.filmId)}>

@@ -4,9 +4,9 @@ export function formatDuration(seconds: number): string {
   const minutes = Math.floor((seconds % 3600) / 60);
   const secs = seconds % 60;
   let result = '';
-  if (hours > 0) result += `${hours}h `;
-  if (minutes > 0) result += `${minutes}m `;
-  if (secs > 0 || result === '') result += `${secs}s`;
+  if (hours > 0) result += `${hours}ч `;
+  if (minutes > 0) result += `${minutes}м `;
+  if (secs > 0 || result === '') result += `${secs}с `;
   return result.trim();
 }
 

@@ -22,7 +22,7 @@ export default function LoginPage() {
       await login(username, password);
       router.push('/');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
+      setError(err.response?.data?.message || 'Ошибка входа. Проверьте свои учетные данные.');
     } finally {
       setLoading(false);
     }
@@ -32,7 +32,7 @@ export default function LoginPage() {
     <Container maxWidth="sm">
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
         <Typography variant="h4" component="h1" gutterBottom>
-          Login
+          Вход
         </Typography>
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3, width: '100%' }}>
           {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
@@ -40,7 +40,7 @@ export default function LoginPage() {
             margin="normal"
             required
             fullWidth
-            label="Username"
+            label="Имя пользователя"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             autoFocus
@@ -49,7 +49,7 @@ export default function LoginPage() {
             margin="normal"
             required
             fullWidth
-            label="Password"
+            label="Пароль"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -61,11 +61,11 @@ export default function LoginPage() {
             sx={{ mt: 3, mb: 2 }}
             disabled={loading}
           >
-            {loading ? 'Logging in...' : 'Login'}
+            {loading ? 'Вход...' : 'Войти'}
           </Button>
           <Box sx={{ textAlign: 'center' }}>
             <Link href="/register" variant="body2">
-              Don't have an account? Register
+              Нет аккаунта? Зарегистрироваться
             </Link>
           </Box>
         </Box>

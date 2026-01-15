@@ -25,17 +25,17 @@ export default function FilmCard({ film }: FilmCardProps) {
           WebkitLineClamp: 3,
           WebkitBoxOrient: 'vertical',
         }}>
-          {film.description || 'No description available'}
+          {film.description || 'Описание отсутствует'}
         </Typography>
         {film.durationSeconds !== undefined && film.durationSeconds !== null && film.durationSeconds > 0 && (
           <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            Duration: {formatDuration(film.durationSeconds)}
+            Длительность: {formatDuration(film.durationSeconds)}
           </Typography>
         )}
       </CardContent>
       <CardActions>
         <Button size="small" onClick={() => router.push(`/films/${film.filmId}`)}>
-          Watch
+          Смотреть
         </Button>
       </CardActions>
     </Card>

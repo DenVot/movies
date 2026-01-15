@@ -29,7 +29,7 @@ export default function VideoUploadDialog({ open, onClose, filmId }: VideoUpload
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
       if (selectedFile.type !== 'video/mp4') {
-        setError('Only MP4 files are supported');
+        setError('Поддерживаются только файлы MP4');
         return;
       }
       setFile(selectedFile);
@@ -53,7 +53,7 @@ export default function VideoUploadDialog({ open, onClose, filmId }: VideoUpload
         setSuccess(false);
       }, 2000);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to upload video');
+      setError(err.response?.data?.message || 'Ошибка загрузки видео');
     } finally {
       setLoading(false);
     }
@@ -68,9 +68,9 @@ export default function VideoUploadDialog({ open, onClose, filmId }: VideoUpload
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Upload Video</DialogTitle>
+      <DialogTitle>Загрузить видео</DialogTitle>
       <DialogContent>
-        {success && <Alert severity="success" sx={{ mb: 2 }}>Video uploaded successfully!</Alert>}
+        {success && <Alert severity="success" sx={{ mb: 2 }}>Видео успешно загружено!</Alert>}
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
         <Box sx={{ mt: 1 }}>
           <input
@@ -81,15 +81,15 @@ export default function VideoUploadDialog({ open, onClose, filmId }: VideoUpload
           />
           {file && (
             <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-              File size: {(file.size / 1024 / 1024).toFixed(2)} MB
+              Размер файла: {(file.size / 1024 / 1024).toFixed(2)} МБ
             </Typography>
           )}
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose}>Cancel</Button>
+        <Button onClick={handleClose}>Отмена</Button>
         <Button onClick={handleSubmit} variant="contained" disabled={loading || !file}>
-          {loading ? 'Uploading...' : 'Upload'}
+          {loading ? 'Загрузка...' : 'Загрузить'}
         </Button>
       </DialogActions>
     </Dialog>

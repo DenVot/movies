@@ -24,10 +24,10 @@ export default function NotFound() {
           404
         </Typography>
         <Typography variant="h4" component="h2" gutterBottom>
-          Page Not Found
+          Страница не найдена
         </Typography>
         <Typography variant="body1" color="text.secondary" sx={{ maxWidth: '500px' }}>
-          The page you are looking for does not exist or has been moved.
+          Страница, которую вы ищете, не существует или была перемещена.
         </Typography>
         <Button
           variant="contained"
@@ -36,7 +36,7 @@ export default function NotFound() {
           onClick={() => router.push('/')}
           sx={{ mt: 2 }}
         >
-          Go to Home Page
+          На главную
         </Button>
       </Box>
     </Container>

@@ -59,12 +59,12 @@ export default function FilmEditDialog({ open, onClose, filmId, mode }: FilmEdit
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>{mode === 'create' ? 'Create Film' : 'Edit Film'}</DialogTitle>
+      <DialogTitle>{mode === 'create' ? 'Создать фильм' : 'Редактировать фильм'}</DialogTitle>
       <DialogContent>
         <TextField
           autoFocus
           margin="dense"
-          label="Name"
+          label="Название"
           fullWidth
           variant="outlined"
           value={name}
@@ -73,7 +73,7 @@ export default function FilmEditDialog({ open, onClose, filmId, mode }: FilmEdit
         />
         <TextField
           margin="dense"
-          label="Description"
+          label="Описание"
           fullWidth
           multiline
           rows={4}
@@ -83,9 +83,9 @@ export default function FilmEditDialog({ open, onClose, filmId, mode }: FilmEdit
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
+        <Button onClick={onClose}>Отмена</Button>
         <Button onClick={handleSubmit} variant="contained" disabled={loading || !name}>
-          {loading ? 'Saving...' : 'Save'}
+          {loading ? 'Сохранение...' : 'Сохранить'}
         </Button>
       </DialogActions>
     </Dialog>
